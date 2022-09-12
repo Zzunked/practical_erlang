@@ -7,8 +7,14 @@
 
 %% implement lists:dropwhile/2
 %% http://www.erlang.org/doc/man/lists.html#dropwhile-2
-dropwhile(Pred, List) ->
-    List.
+
+dropwhile(_, []) ->  [];
+dropwhile(Pred, [H|T]) ->
+    case Pred(H) of
+        true -> dropwhile(Pred, T);
+        false -> [H|T]
+    end.
+
 
 
 dropwhile_test() ->
@@ -24,8 +30,15 @@ dropwhile_test() ->
 
 %% implement lists:takewhile/2
 %% http://www.erlang.org/doc/man/lists.html#takewhile-2
-takewhile(Pred, List) ->
-    List.
+
+takewhile(_, []) -> [];
+takewhile(Pred, [H|T]) ->
+    case Pred(H) of
+        true -> [H | takewhile(Pred, T)];
+        false -> []
+    end.
+
+
 
 
 takewhile_test() ->

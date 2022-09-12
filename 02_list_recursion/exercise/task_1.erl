@@ -6,8 +6,14 @@
 
 %% implement lists:any/2
 %% http://www.erlang.org/doc/man/lists.html#any-2
+any(_, []) -> false;
 any(Pred, List) ->
-    false.
+    [H|T] = List,
+    case Pred(H) of
+        true -> true;
+        false -> any(Pred, T)
+    end.
+
 
 
 any_test() ->
@@ -23,8 +29,13 @@ any_test() ->
 
 %% implement lists:all/2
 %% http://www.erlang.org/doc/man/lists.html#all-2
+all(_, []) -> true;
 all(Pred, List) ->
-    false.
+    [H|T] = List,
+    case Pred(H) of
+        false -> false;
+        true -> all(Pred, T)
+    end.
 
 
 all_test() ->
