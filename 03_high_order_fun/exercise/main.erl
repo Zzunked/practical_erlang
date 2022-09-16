@@ -1,6 +1,12 @@
 -module(main).
 
--export([sample_champ/0, get_stat/1, filter_sick_players/1, make_pairs/2]).
+-export([sample_champ/0, 
+         get_stat/1, 
+         filter_sick_players/1, 
+         filter_sick_players_test/0,
+         make_pairs/2,
+         make_pairs_test/0
+        ]).
 -include_lib("eunit/include/eunit.hrl").
 
 
@@ -60,7 +66,26 @@ sample_champ() ->
 
 
 get_stat(Champ) ->
-    {0, 0, 0.0, 0.9}.
+    {NumTeams, TotalNumPlayers, TotalAge, TotalRating} = get_teams_total_stats(Champ),
+    AvgAge = TotalAge/TotalNumPlayers,
+    AvgRating = TotalRating/TotalNumPlayers,
+    {NumTeams, TotalNumPlayers, AvgAge, AvgRating}.
+
+get_teams_total_stats(Champ) ->
+    lists:foldl(fun({team, _, Players}, {NumTeams, TotalNumPlayers, TotalAge, TotalRating}) ->
+                        {TeamNumPlayers, TotalTeamAge, TotalTeamRating} = get_team_stat(Players),
+                        {NumTeams + 1, TotalNumPlayers + TeamNumPlayers, TotalAge + TotalTeamAge, TotalRating + TotalTeamRating}
+                end,
+                {0, 0, 0, 0},
+                Champ).
+
+get_team_stat(Players) ->
+    lists:foldl(fun({player, _, Age, Raiting, _}, {TeamNumPlayers, TotalTeamAge, TotalTeamRating}) ->
+                        {TeamNumPlayers + 1, TotalTeamAge + Age, TotalTeamRating + Raiting}
+                end,
+                {0, 0, 0},
+               Players).
+
 
 
 get_stat_test() ->
@@ -69,7 +94,24 @@ get_stat_test() ->
 
 
 filter_sick_players(Champ) ->
-    Champ.
+    AllowedTeams = filter_teams_with_lots_sick_players(Champ),
+    AllowedTeams.
+
+
+filter_sick_players_in_team(Players) ->
+    lists:filtermap(fun({player, Name, Age, Rating, Health}) ->
+                            if Health < 50 -> false;
+                               true -> {true, {player, Name, Age, Rating, Health}}
+                            end
+                    end, Players).
+
+filter_teams_with_lots_sick_players(Champ) ->
+    lists:filtermap(fun({team, TeamName, Players}) ->
+                            HealthyPlayersCnt = lists:flatlength(filter_sick_players_in_team(Players)),
+                            if HealthyPlayersCnt < 5 -> false;
+                                true -> {true, {team, TeamName, Players}}
+                            end
+                    end, Champ).
 
 
 filter_sick_players_test() ->
@@ -104,8 +146,9 @@ filter_sick_players_test() ->
     ok.
 
 
-make_pairs(Team1, Team2) ->
-    [].
+make_pairs({_, _, Players1}, {_, _, Players2}) ->
+    [{Name1, Name2} || {_, Name1, _, Rate1, _} <- Players1, {_, Name2, _, Rate2, _} <- Players2, Rate1 + Rate2 > 600].
+
 
 
 make_pairs_test() ->
