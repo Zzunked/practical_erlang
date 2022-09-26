@@ -1,26 +1,28 @@
+-module(group_by).
+-export([group_by_sex/1]).
+
 %% Реализовать group_by
 
 %% Первый этап -- решение частной задачи
 
 %% У нас есть список пользователей вида:
-[
- {user, "Bob", 21, male},
- {user, "Bill", 23, male},
- {user, "Helen", 17, female},
- {user, "Kate", 25, female},
- {user, "John", 20, male}
-].
+%[ {user, "Bob", 21, male}, {user, "Bill", 23, male}, {user, "Helen", 17, female}, {user, "Kate", 25, female}, {user, "John", 20, male} ].
 
 %% Нужно реализовать функцию group_by(Users) -> Groups
 %% которая сгруппирует пользователей по полу, и вернет map
 %% где ключами будет пол, а значениям будет список пользователей этого пола.
 
 %% Например:
-#{
-  male => [{user, "Bob", 21, male}, {user, "Bill", 23, male}, {user, "John", 20, male}],
-  female => [{user, "Kate", 25, female}, {user, "Helen", 17, female}]
-}.
+%#{
+  %male => [{user, "Bob", 21, male}, {user, "Bill", 23, male}, {user, "John", 20, male}],
+  %female => [{user, "Kate", 25, female}, {user, "Helen", 17, female}]
+%}.
 
+group_by_sex(Users) ->
+    MaleList = [{user, Name, Age, Sex} || {user, Name, Age, Sex} <- Users, Sex =:= male],
+    FemaleList = [{user, Name, Age, Sex} || {user, Name, Age, Sex} <- Users, Sex =:= female],
+    MalesAndFemalesDivided = #{male => MaleList, female => FemaleList},
+    MalesAndFemalesDivided.
 
 %% Второй этап -- обобщенное решение
 
@@ -49,25 +51,32 @@
 %% CriteriaFun = fun(User) -> ??? end.
 %% group_by(CriteriaFun, Users) ->
 %%    #{teenage => [{user, "Helen", 17, female}], young => [{user, "Bob", 21, male}, {user, "Bill", 23, male} ...
+%%
+CriteriaFun = fun(User) -> {_, _, Age, _}, Age end.
+
+group_by(CriteriaFun, Users) ->
+    ResultMap = #{},
+    lists:map()
+
 
 %% Третий пример:
 %% У нас есть распределенная система, кластер из нескольких узлов.
 %% В этой системе есть клиентские соединения разных типов, подключенные к разным узлам:
-[
- {session, type_a, node_1, SocketId1},
- {session, type_b, node_1, SocketId2},
- {session, type_a, node_2, SocketId3},
- {session, type_b, node_2, SocketId4}
- ]
+%[
+ %{session, type_a, node_1, SocketId1},
+ %{session, type_b, node_1, SocketId2},
+ %{session, type_a, node_2, SocketId3},
+ %{session, type_b, node_2, SocketId4}
+ %]
 %% Мы хотим сгруппировать эти сессии по узлу:
-#{
-  node_1 => [{session, type_a, node_1, SocketId1}, {session, type_a, node_2, SocketId3}],
-  node_2 => [{session, type_a, node_2, SocketId3}, {session, type_b, node_2, SocketId4}]
- }
+%#{
+  %node_1 => [{session, type_a, node_1, SocketId1}, {session, type_a, node_2, SocketId3}],
+  %node_2 => [{session, type_a, node_2, SocketId3}, {session, type_b, node_2, SocketId4}]
+ %}
 %% А потом мы хотим сгруппировать их по типу:
-#{
-   type_a => [{session, type_a, node_1, SocketId1}, {session, type_a, node_2, SocketId3}],
-   type_b => [{session, type_b, node_1, SocketId2}, {session, type_b, node_2, SocketId4}]
-}
+%#{
+   %type_a => [{session, type_a, node_1, SocketId1}, {session, type_a, node_2, SocketId3}],
+   %type_b => [{session, type_b, node_1, SocketId2}, {session, type_b, node_2, SocketId4}]
+%}
 %% И во всех случаях мы применяем одну и ту же функцию group_by,
 %% передавая ей разные CriteriaFun и разные списки.
