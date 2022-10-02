@@ -1,9 +1,6 @@
 -module(map_reduce).
 
--export([
-    start/1, reducer/2, mapper/2,
-    analyze_file/1, aggregate/1, aggregate/2
-]).
+-export([start/1]).
 
 
 start(Files) ->
